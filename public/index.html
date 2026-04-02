@@ -1161,7 +1161,7 @@ async function loadAdminStories() {
           <td style="font-size:.78rem;color:var(--muted)">${date}</td>
           <td>
             <div class="action-row">
-              <button class="btn btn-ghost btn-sm" onclick="editStory(${s.id})">Edit</button>
+              <button class="btn btn-ghost btn-sm" onclick="editStory(${s.id})">✏️</button>
               <button class="btn btn-danger btn-sm" onclick="deleteStory(${s.id}, '${escHtml(s.title).replace(/'/g, "\\'")}')">🗑️</button>
             </div>
           </td>
