@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storyfire — Stories that Spark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1025;
+    --paper: #faf8f5;
+    --warm: #f5f0e8;
+    --ember: #e8460a;
+    --ember-light: #ff6b35;
+    --gold: #c9963a;
+    --gold-light: #f0c060;
+    --muted: #8a7f92;
+    --card-bg: #ffffff;
+    --border: rgba(26,16,37,0.08);
+    --shadow: 0 4px 24px rgba(26,16,37,0.10);
+    --shadow-lg: 0 12px 48px rgba(26,16,37,0.16);
+    --radius: 18px;
+    --radius-sm: 10px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── ANIMATED BG ─── */
+  .bg-orbs {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .orb {
+    position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.18;
+    animation: drift 20s infinite ease-in-out;
+  }
+  .orb-1 { width: 500px; height: 500px; background: #e8460a; top: -100px; left: -100px; animation-delay: 0s; }
+  .orb-2 { width: 400px; height: 400px; background: #c9963a; bottom: -80px; right: -80px; animation-delay: -7s; }
+  .orb-3 { width: 300px; height: 300px; background: #8a2be2; top: 40%; left: 60%; animation-delay: -14s; }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -40px) scale(1.05); }
+    66% { transform: translate(-20px, 20px) scale(0.95); }
+  }
+
+  /* ─── LAYOUT ─── */
+  #app { position: relative; z-index: 1; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250,248,245,0.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    animation: slideDown 0.5s ease;
+  }
+  @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .nav-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 900;
+    background: linear-gradient(135deg, var(--ember), var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 50px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500;
+    cursor: pointer; border: none; transition: var(--transition);
+    text-decoration: none; white-space: nowrap;
+  }
+  .btn-ghost {
+    background: transparent; color: var(--muted);
+    border: 1.5px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--warm); color: var(--ink); border-color: var(--ink); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--ember), #c93800);
+    color: #fff; box-shadow: 0 2px 12px rgba(232,70,10,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(232,70,10,0.4); }
+  .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+  .btn-danger { background: #dc2626; color: #fff; }
+  .btn-danger:hover { background: #b91c1c; }
+  .btn-success { background: #16a34a; color: #fff; }
+  .btn-success:hover { background: #15803d; }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; animation: fadeIn 0.4s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 80px 20px 60px;
+    text-align: center; max-width: 700px; margin: 0 auto;
+  }
+  .hero-tag {
+    display: inline-block; padding: 5px 16px; border-radius: 50px;
+    background: rgba(232,70,10,0.1); color: var(--ember);
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    margin-bottom: 20px; animation: pulse 3s infinite;
+  }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,70,10,0.2)} 50%{box-shadow:0 0 0 8px rgba(232,70,10,0)} }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 900; line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .hero h1 em { font-style: italic; color: var(--ember); }
+
+  .hero p {
+    font-size: 1.05rem; color: var(--muted); max-width: 480px; margin: 0 auto 32px;
+    line-height: 1.65;
+  }
+
+  /* ─── CATEGORIES ─── */
+  .categories {
+    padding: 0 20px 32px; max-width: 900px; margin: 0 auto;
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  }
+  .cat-pill {
+    padding: 7px 18px; border-radius: 50px; cursor: pointer;
+    border: 1.5px solid var(--border); background: var(--card-bg);
+    font-size: 0.85rem; font-weight: 500; color: var(--muted);
+    transition: var(--transition);
+  }
+  .cat-pill:hover, .cat-pill.active {
+    border-color: var(--ember); color: var(--ember);
+    background: rgba(232,70,10,0.05);
+  }
+
+  /* ─── STORIES GRID ─── */
+  .stories-section { padding: 0 16px 80px; max-width: 1000px; margin: 0 auto; }
+
+  .stories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  /* ─── STORY CARD ─── */
+  .story-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+    animation: cardIn 0.5s ease both;
+  }
+  .story-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(232,70,10,0.2);
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-banner {
+    height: 120px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem;
+    background: linear-gradient(135deg, var(--warm), #ede8df);
+    position: relative; overflow: hidden;
+  }
+  .card-banner::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.06));
+  }
+
+  .card-body { padding: 20px; }
+
+  .card-meta {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 10px;
+  }
+  .card-category {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--ember);
+    padding: 3px 10px; border-radius: 50px;
+    background: rgba(232,70,10,0.08);
+  }
+  .card-date { font-size: 0.75rem; color: var(--muted); margin-left: auto; }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; font-weight: 700;
+    margin-bottom: 10px; line-height: 1.35;
+  }
+  .card-excerpt {
+    font-size: 0.875rem; color: var(--muted);
+    line-height: 1.6; display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  .card-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-reactions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .reaction-chip {
+    font-size: 0.78rem; padding: 3px 8px; border-radius: 50px;
+    background: var(--warm); color: var(--muted);
+    display: flex; align-items: center; gap: 3px;
+  }
+  .card-views { font-size: 0.75rem; color: var(--muted); }
+
+  /* ─── STORY DETAIL ─── */
+  .story-detail { max-width: 720px; margin: 0 auto; padding: 0 20px 80px; }
+
+  .story-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--muted); cursor: pointer;
+    padding: 20px 0 32px;
+    font-size: 0.9rem; font-weight: 500;
+    transition: var(--transition);
+    background: none; border: none; font-family: inherit;
+  }
+  .story-back:hover { color: var(--ember); }
+
+  .story-header { text-align: center; margin-bottom: 40px; }
+  .story-emoji-big {
+    font-size: 4rem; margin-bottom: 20px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  .story-header .category-badge {
+    display: inline-block; padding: 5px 16px; border-radius: 50px;
+    background: rgba(232,70,10,0.1); color: var(--ember);
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .story-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 900; line-height: 1.2; margin-bottom: 16px;
+  }
+  .story-byline {
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    color: var(--muted); font-size: 0.85rem;
+  }
+  .story-byline span::before { content: '·'; margin-right: 16px; }
+  .story-byline span:first-child::before { content: ''; margin: 0; }
+
+  .story-content {
+    font-size: 1.1rem; line-height: 1.85;
+    color: #2a2030;
+    white-space: pre-wrap;
+  }
+  .story-content p { margin-bottom: 1.4em; }
+
+  /* ─── REACTION BAR ─── */
+  .reaction-bar {
+    margin: 48px 0 32px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+  .reaction-bar h3 {
+    text-align: center; margin-bottom: 20px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+  }
+  .emoji-grid {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  }
+  .emoji-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 12px 16px; border-radius: var(--radius-sm);
+    border: 2px solid var(--border); background: var(--warm);
+    cursor: pointer; transition: var(--transition);
+    font-size: 1.6rem; min-width: 64px;
+    position: relative;
+  }
+  .emoji-btn:hover { transform: scale(1.1); border-color: var(--gold); background: var(--card-bg); }
+  .emoji-btn.reacted {
+    border-color: var(--ember);
+    background: rgba(232,70,10,0.08);
+  }
+  .emoji-btn .emoji-count {
+    font-size: 0.75rem; font-weight: 600; color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .emoji-btn.reacted .emoji-count { color: var(--ember); }
+
+  .emoji-pop {
+    position: absolute; top: -30px;
+    font-size: 1.4rem;
+    animation: emojiPop 0.6s ease forwards;
+    pointer-events: none;
+  }
+  @keyframes emojiPop {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-30px) scale(1.5); opacity: 0; }
+  }
+
+  /* ─── ADMIN ─── */
+  .admin-container { max-width: 1000px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  .admin-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 32px; flex-wrap: gap;
+  }
+  .admin-header h1 {
+    font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900;
+  }
+
+  /* ─── STATS CARDS ─── */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px; margin-bottom: 36px;
+  }
+  .stat-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    text-align: center; box-shadow: var(--shadow);
+  }
+  .stat-card .stat-icon { font-size: 2rem; margin-bottom: 8px; }
+  .stat-card .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; font-weight: 900; color: var(--ember);
+  }
+  .stat-card .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  /* ─── ADMIN TABS ─── */
+  .admin-tabs {
+    display: flex; gap: 4px; margin-bottom: 28px;
+    background: var(--warm); border-radius: var(--radius-sm); padding: 4px;
+  }
+  .admin-tab {
+    flex: 1; padding: 10px 16px; border-radius: 8px; cursor: pointer;
+    border: none; background: transparent; font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem; font-weight: 500; color: var(--muted);
+    transition: var(--transition);
+  }
+  .admin-tab.active { background: var(--card-bg); color: var(--ink); box-shadow: var(--shadow); }
+
+  /* ─── STORY FORM ─── */
+  .story-form {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow);
+    margin-bottom: 28px;
+  }
+  .story-form h2 {
+    font-family: 'Playfair Display', serif; font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-row.single { grid-template-columns: 1fr; }
+  @media(max-width:600px){ .form-row { grid-template-columns: 1fr; } }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .form-group label { font-size: 0.82rem; font-weight: 600; color: var(--muted); letter-spacing: 0.4px; }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 11px 14px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--warm);
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink);
+    transition: var(--transition); outline: none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--ember); background: #fff;
+    box-shadow: 0 0 0 3px rgba(232,70,10,0.08);
+  }
+  .form-group textarea { resize: vertical; min-height: 200px; line-height: 1.7; }
+
+  .emoji-picker {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .emoji-pick-btn {
+    font-size: 1.6rem; padding: 8px; border-radius: var(--radius-sm);
+    border: 2px solid var(--border); background: var(--warm); cursor: pointer;
+    transition: var(--transition);
+  }
+  .emoji-pick-btn:hover, .emoji-pick-btn.selected { border-color: var(--ember); background: rgba(232,70,10,0.08); transform: scale(1.1); }
+
+  /* ─── STORIES TABLE ─── */
+  .admin-table-wrap { overflow-x: auto; }
+  .admin-table {
+    width: 100%; border-collapse: collapse;
+    background: var(--card-bg); border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--shadow);
+  }
+  .admin-table th {
+    background: var(--warm); padding: 12px 16px;
+    text-align: left; font-size: 0.78rem; font-weight: 700;
+    color: var(--muted); letter-spacing: 0.6px; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .admin-table td {
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    font-size: 0.875rem; vertical-align: middle;
+  }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .admin-table tr:hover td { background: var(--warm); }
+
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 50px;
+    font-size: 0.72rem; font-weight: 600;
+  }
+  .badge-green { background: rgba(22,163,74,0.1); color: #16a34a; }
+  .badge-gray { background: var(--warm); color: var(--muted); }
+
+  /* ─── ANALYTICS ─── */
+  .emoji-bars { display: flex; flex-direction: column; gap: 12px; }
+  .emoji-bar-row { display: flex; align-items: center; gap: 12px; }
+  .emoji-bar-row span:first-child { font-size: 1.4rem; min-width: 32px; }
+  .emoji-bar-row .bar-wrap { flex: 1; background: var(--warm); border-radius: 50px; height: 10px; overflow: hidden; }
+  .emoji-bar-row .bar-fill { height: 100%; border-radius: 50px; background: linear-gradient(90deg, var(--ember), var(--gold)); transition: width 0.8s ease; }
+  .emoji-bar-row .bar-count { font-size: 0.8rem; font-weight: 600; color: var(--muted); min-width: 32px; text-align: right; }
+
+  /* ─── LOGIN ─── */
+  .login-wrap {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .login-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 40px 36px;
+    width: 100%; max-width: 380px; box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+  .login-card .logo { font-size: 3rem; margin-bottom: 8px; }
+  .login-card h1 {
+    font-family: 'Playfair Display', serif; font-size: 1.6rem; margin-bottom: 6px;
+  }
+  .login-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
+  .login-error {
+    background: rgba(220,38,38,0.08); color: #dc2626;
+    border-radius: var(--radius-sm); padding: 10px; font-size: 0.85rem;
+    margin-bottom: 16px; display: none;
+  }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center; padding: 80px 20px;
+  }
+  .empty-state .empty-emoji { font-size: 4rem; margin-bottom: 16px; }
+  .empty-state h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 8px; }
+  .empty-state p { color: var(--muted); }
+
+  /* ─── LOADING ─── */
+  .loading {
+    display: flex; align-items: center; justify-content: center;
+    padding: 80px; flex-direction: column; gap: 16px;
+  }
+  .spinner {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 3px solid var(--border);
+    border-top-color: var(--ember);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── TOAST ─── */
+  #toast-container {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    z-index: 999; display: flex; flex-direction: column; gap: 8px;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--ink); color: #fff;
+    padding: 12px 24px; border-radius: 50px;
+    font-size: 0.875rem; font-weight: 500;
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+    white-space: nowrap;
+  }
+  .toast.success { background: #16a34a; }
+  .toast.error { background: #dc2626; }
+  @keyframes toastIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes toastOut { to{opacity:0;transform:translateY(12px)} }
+
+  /* ─── MOBILE ─── */
+  @media(max-width: 640px) {
+    .hero { padding: 48px 20px 40px; }
+    nav { height: 56px; }
+    .nav-brand { font-size: 1.2rem; }
+    .stories-grid { grid-template-columns: 1fr; gap: 16px; }
+    .emoji-grid { gap: 8px; }
+    .emoji-btn { min-width: 54px; padding: 10px 12px; font-size: 1.4rem; }
+    .admin-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .btn { padding: 8px 14px; font-size: 0.82rem; }
+  }
+
+  /* ─── SWITCH ─── */
+  .toggle-wrap { display: flex; align-items: center; gap: 10px; }
+  .toggle {
+    position: relative; width: 44px; height: 24px;
+    cursor: pointer;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0; background: var(--border);
+    border-radius: 50px; transition: var(--transition);
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute; width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: #fff; border-radius: 50%; transition: var(--transition);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--ember); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  /* action row spacing */
+  .action-row { display: flex; gap: 8px; }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 28px 0; }
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<div id="app">
+
+  <!-- ─── NAV ─── -->
+  <nav>
+    <button class="nav-brand" onclick="showView('home')" style="background:none;border:none;cursor:pointer;padding:0;font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,#e8460a,#c9963a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+      🔥 Storyfire
+    </button>
+    <div class="nav-actions" id="nav-actions">
+      <button class="btn btn-ghost btn-sm" onclick="showView('admin-login')" id="admin-btn">Admin ⚙️</button>
+    </div>
+  </nav>
+
+  <!-- ─── HOME VIEW ─── -->
+  <div id="view-home" class="view active">
+    <div class="hero">
+      <div class="hero-tag">✨ Fresh Stories</div>
+      <h1>Stories that <em>ignite</em><br>your imagination</h1>
+      <p>Explore handpicked tales and react with your heart. No words needed — just emojis.</p>
+    </div>
+
+    <div class="categories" id="categories-bar">
+      <div class="cat-pill active" onclick="filterCategory('all', this)">🌍 All</div>
+    </div>
+
+    <div class="stories-section">
+      <div id="stories-container">
+        <div class="loading"><div class="spinner"></div><span style="color:var(--muted);font-size:.9rem">Loading stories…</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── STORY DETAIL VIEW ─── -->
+  <div id="view-story" class="view">
+    <div class="story-detail">
+      <button class="story-back" onclick="showView('home')">← Back to stories</button>
+      <div id="story-content-area">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ADMIN LOGIN ─── -->
+  <div id="view-admin-login" class="view">
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="logo">🔐</div>
+        <h1>Admin Portal</h1>
+        <p>Enter your Vercel environment password to continue</p>
+        <div class="login-error" id="login-error">Incorrect password. Try again.</div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="admin-pw-input" placeholder="••••••••••••"
+            onkeydown="if(event.key==='Enter')adminLogin()">
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="adminLogin()">Sign In</button>
+        <button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%;justify-content:center" onclick="showView('home')">← Back to Stories</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ADMIN DASHBOARD ─── -->
+  <div id="view-admin" class="view">
+    <div class="admin-container">
+      <div class="admin-header">
+        <h1>📊 Dashboard</h1>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost btn-sm" onclick="showView('home')">← Stories</button>
+          <button class="btn btn-danger btn-sm" onclick="adminLogout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-num" id="stat-total">-</div><div class="stat-label">Total Stories</div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-num" id="stat-pub">-</div><div class="stat-label">Published</div></div>
+        <div class="stat-card"><div class="stat-icon">❤️</div><div class="stat-num" id="stat-reactions">-</div><div class="stat-label">Reactions</div></div>
+        <div class="stat-card"><div class="stat-icon">👁️</div><div class="stat-num" id="stat-views">-</div><div class="stat-label">Total Views</div></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchAdminTab('stories', this)">📚 Stories</button>
+        <button class="admin-tab" onclick="switchAdminTab('new', this)">✏️ New Story</button>
+        <button class="admin-tab" onclick="switchAdminTab('analytics', this)">📈 Analytics</button>
+      </div>
+
+      <!-- Tab: Stories List -->
+      <div id="admin-tab-stories">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Story</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Views</th>
+                <th>Reactions</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-stories-tbody">
+              <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: New Story -->
+      <div id="admin-tab-new" style="display:none">
+        <div class="story-form">
+          <h2 id="form-title">✏️ Write a New Story</h2>
+          <input type="hidden" id="edit-story-id">
+
+          <div class="form-group">
+            <label>Cover Emoji</label>
+            <div class="emoji-picker" id="cover-emoji-picker">
+              📖 📚 🌙 🔥 ❤️ 🌊 🌿 ⭐ 🎭 🏔️ 🌸 🦋 🎪 🌈 💫 🔮
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Title *</label>
+              <input type="text" id="story-title" placeholder="A captivating title…">
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <select id="story-category">
+                <option>General</option>
+                <option>Adventure</option>
+                <option>Romance</option>
+                <option>Mystery</option>
+                <option>Fantasy</option>
+                <option>Horror</option>
+                <option>Sci-Fi</option>
+                <option>Inspiration</option>
+                <option>Humor</option>
+                <option>Drama</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Author</label>
+              <input type="text" id="story-author" placeholder="Author name" value="Admin">
+            </div>
+            <div class="form-group" style="justify-content:flex-end;padding-bottom:4px">
+              <label>Published</label>
+              <div class="toggle-wrap">
+                <label class="toggle">
+                  <input type="checkbox" id="story-published" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+                <span style="font-size:.85rem;color:var(--muted)">Visible to readers</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Story Content *</label>
+            <textarea id="story-content" placeholder="Write your story here…&#10;&#10;Press Enter for new paragraphs. Markdown not required — your writing will shine as-is."></textarea>
+          </div>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="submitStory()">🚀 Publish Story</button>
+            <button class="btn btn-ghost" onclick="resetForm()">✕ Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Analytics -->
+      <div id="admin-tab-analytics" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px" id="analytics-grid">
+          <div class="story-form">
+            <h2>😊 Emoji Reactions</h2>
+            <div class="divider"></div>
+            <div class="emoji-bars" id="emoji-bars">
+              <div style="color:var(--muted);font-size:.9rem">Loading…</div>
+            </div>
+          </div>
+          <div class="story-form">
+            <h2>🏆 Top Stories</h2>
+            <div class="divider"></div>
+            <div id="top-stories-list">
+              <div style="color:var(--muted);font-size:.9rem">Loading…</div>
+            </div>
+          </div>
+        </div>
+        <div class="story-form" style="margin-top:24px">
+          <h2>🕐 Recent Activity</h2>
+          <div class="divider"></div>
+          <div id="recent-activity">Loading…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────
+const state = {
+  stories: [],
+  currentStory: null,
+  adminToken: localStorage.getItem('sf_admin') || null,
+  sessionId: localStorage.getItem('sf_session') || (() => {
+    const id = 'sess_' + Math.random().toString(36).slice(2) + Date.now();
+    localStorage.setItem('sf_session', id);
+    return id;
+  })(),
+  selectedEmoji: '📖',
+  currentFilter: 'all',
+  editingId: null,
+};
+
+const EMOJIS = ['❤️','😂','😮','😢','🔥','👏','🤔','💯'];
+const COVER_EMOJIS = ['📖','📚','🌙','🔥','❤️','🌊','🌿','⭐','🎭','🏔️','🌸','🦋','🎪','🌈','💫','🔮'];
+
+// ─── VIEWS ───────────────────────────────────────────
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + (name === 'admin' ? 'admin' : name === 'admin-login' ? 'admin-login' : name === 'story' ? 'story' : 'home')).classList.add('active');
+
+  if (name === 'home') loadStories();
+  if (name === 'admin') {
+    if (!state.adminToken) { showView('admin-login'); return; }
+    updateNavAdmin(true);
+    loadAdminStories();
+    loadStats();
+  }
+  if (name === 'admin-login') updateNavAdmin(false);
+}
+
+function updateNavAdmin(loggedIn) {
+  const btn = document.getElementById('admin-btn');
+  if (loggedIn) {
+    btn.textContent = 'Dashboard 📊';
+    btn.onclick = () => showView('admin');
+  } else {
+    btn.textContent = 'Admin ⚙️';
+    btn.onclick = () => showView('admin-login');
+  }
+}
+
+// ─── API ──────────────────────────────────────────────
+async function api(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  if (state.adminToken) headers['Authorization'] = `Bearer ${state.adminToken}`;
+  const res = await fetch(path, { ...options, headers });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ─── STORIES ─────────────────────────────────────────
+async function loadStories() {
+  const container = document.getElementById('stories-container');
+  container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    state.stories = await api('/api/stories');
+    buildCategories();
+    renderStories(state.stories);
+  } catch (e) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-emoji">😔</div><h3>Couldn't load stories</h3><p>${e.message}</p></div>`;
+  }
+}
+
+function buildCategories() {
+  const cats = ['all', ...new Set(state.stories.map(s => s.category))];
+  const bar = document.getElementById('categories-bar');
+  bar.innerHTML = cats.map(c => `
+    <div class="cat-pill ${c === state.currentFilter ? 'active' : ''}"
+      onclick="filterCategory('${c}', this)">
+      ${c === 'all' ? '🌍 All' : c}
+    </div>
+  `).join('');
+}
+
+function filterCategory(cat, el) {
+  state.currentFilter = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  const filtered = cat === 'all' ? state.stories : state.stories.filter(s => s.category === cat);
+  renderStories(filtered);
+}
+
+function renderStories(stories) {
+  const container = document.getElementById('stories-container');
+  if (!stories.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-emoji">📭</div><h3>No stories yet</h3><p>Check back soon!</p></div>';
+    return;
+  }
+  container.innerHTML = `<div class="stories-grid">${stories.map((s, i) => storyCardHTML(s, i)).join('')}</div>`;
+}
+
+function storyCardHTML(s, i) {
+  const topReactions = (s.reactions || [])
+    .sort((a,b) => b.count - a.count).slice(0,3)
+    .map(r => `<span class="reaction-chip">${r.emoji} ${r.count}</span>`).join('');
+  const date = new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  const excerpt = s.content.slice(0, 120).trim() + (s.content.length > 120 ? '…' : '');
+
+  return `
+    <div class="story-card" onclick="openStory(${s.id})" style="animation-delay:${i*0.07}s">
+      <div class="card-banner">${s.cover_emoji || '📖'}</div>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-category">${s.category}</span>
+          <span class="card-date">${date}</span>
+        </div>
+        <div class="card-title">${escHtml(s.title)}</div>
+        <div class="card-excerpt">${escHtml(excerpt)}</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-reactions">${topReactions || '<span class="card-views" style="color:var(--muted);font-size:.78rem">Be first to react!</span>'}</div>
+        <div class="card-views">👁️ ${s.views || 0}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ─── STORY DETAIL ─────────────────────────────────────
+async function openStory(id) {
+  showView('story');
+  document.getElementById('story-content-area').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  try {
+    const story = await api(`/api/stories/${id}`);
+    state.currentStory = story;
+
+    // Track view
+    fetch('/api/views', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ story_id: id, session_id: state.sessionId })
+    }).catch(() => {});
+
+    // Get user's existing reactions
+    const rxData = await api(`/api/reactions?story_id=${id}&session_id=${state.sessionId}`);
+
+    renderStoryDetail(story, rxData);
+  } catch(e) {
+    document.getElementById('story-content-area').innerHTML = `<div class="empty-state"><h3>Story not found</h3><p>${e.message}</p></div>`;
+  }
+}
+
+function renderStoryDetail(story, rxData) {
+  const date = new Date(story.created_at).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+  const reactionMap = {};
+  (rxData.counts || []).forEach(r => reactionMap[r.emoji] = parseInt(r.count));
+  const userReacted = new Set(rxData.userReactions || []);
+
+  document.getElementById('story-content-area').innerHTML = `
+    <div class="story-header">
+      <div class="story-emoji-big">${story.cover_emoji || '📖'}</div>
+      <div class="category-badge">${story.category}</div>
+      <h1>${escHtml(story.title)}</h1>
+      <div class="story-byline">
+        <span>By ${escHtml(story.author || 'Admin')}</span>
+        <span>${date}</span>
+        <span>👁️ ${story.views || 0} views</span>
+      </div>
+    </div>
+
+    <div class="story-content">${escHtml(story.content)}</div>
+
+    <div class="reaction-bar">
+      <h3>How did this make you feel?</h3>
+      <div class="emoji-grid" id="emoji-grid-${story.id}">
+        ${EMOJIS.map(emoji => `
+          <button class="emoji-btn ${userReacted.has(emoji) ? 'reacted' : ''}"
+            onclick="toggleReaction(${story.id}, '${emoji}', this)"
+            title="${emoji}">
+            ${emoji}
+            <span class="emoji-count">${reactionMap[emoji] || 0}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ─── REACTIONS ────────────────────────────────────────
+async function toggleReaction(storyId, emoji, btn) {
+  // Pop animation
+  const pop = document.createElement('span');
+  pop.className = 'emoji-pop';
+  pop.textContent = emoji;
+  btn.appendChild(pop);
+  setTimeout(() => pop.remove(), 700);
+
+  try {
+    const data = await api('/api/reactions', {
+      method: 'POST',
+      body: JSON.stringify({ story_id: storyId, emoji, session_id: state.sessionId })
+    });
+
+    // Update all buttons in the grid
+    const grid = document.getElementById(`emoji-grid-${storyId}`);
+    if (!grid) return;
+    const reactionMap = {};
+    (data.counts || []).forEach(r => reactionMap[r.emoji] = parseInt(r.count));
+    const userReacted = new Set(data.userReactions || []);
+
+    grid.querySelectorAll('.emoji-btn').forEach(b => {
+      const e = b.textContent.trim().split('\n')[0].trim();
+      b.classList.toggle('reacted', userReacted.has(e));
+      const countEl = b.querySelector('.emoji-count');
+      if (countEl) countEl.textContent = reactionMap[e] || 0;
+    });
+  } catch(e) {
+    toast('Could not save reaction', 'error');
+  }
+}
+
+// ─── ADMIN AUTH ────────────────────────────────────────
+async function adminLogin() {
+  const pw = document.getElementById('admin-pw-input').value;
+  if (!pw) return;
+
+  try {
+    // Test with stats endpoint
+    const res = await fetch('/api/stats', {
+      headers: { 'Authorization': `Bearer ${pw}` }
+    });
+    if (!res.ok) throw new Error('Unauthorized');
+    state.adminToken = pw;
+    localStorage.setItem('sf_admin', pw);
+    document.getElementById('login-error').style.display = 'none';
+    document.getElementById('admin-pw-input').value = '';
+    showView('admin');
+    toast('Welcome back, Admin! 👋', 'success');
+  } catch {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function adminLogout() {
+  state.adminToken = null;
+  localStorage.removeItem('sf_admin');
+  updateNavAdmin(false);
+  showView('home');
+  toast('Logged out successfully');
+}
+
+// ─── ADMIN STORIES ────────────────────────────────────
+async function loadAdminStories() {
+  const tbody = document.getElementById('admin-stories-tbody');
+  try {
+    const stories = await api('/api/stories?admin=true');
+    if (!stories.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No stories yet. Write your first one!</td></tr>';
+      return;
+    }
+    tbody.innerHTML = stories.map(s => {
+      const totalRx = (s.reactions || []).reduce((a, r) => a + parseInt(r.count), 0);
+      const date = new Date(s.created_at).toLocaleDateString();
+      return `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:1.4rem">${s.cover_emoji}</span>
+              <div>
+                <div style="font-weight:600;font-size:.875rem">${escHtml(s.title)}</div>
+                <div style="font-size:.75rem;color:var(--muted)">by ${escHtml(s.author)}</div>
+              </div>
+            </div>
+          </td>
+          <td><span style="font-size:.78rem;color:var(--muted)">${s.category}</span></td>
+          <td><span class="badge ${s.published ? 'badge-green' : 'badge-gray'}">${s.published ? 'Live' : 'Draft'}</span></td>
+          <td>${s.views || 0}</td>
+          <td>${totalRx}</td>
+          <td style="font-size:.78rem;color:var(--muted)">${date}</td>
+          <td>
+            <div class="action-row">
+              <button class="btn btn-ghost btn-sm" onclick="editStory(${s.id})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteStory(${s.id}, '${escHtml(s.title).replace(/'/g, "\\'")}')">Del</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted)">${e.message}</td></tr>`;
+  }
+}
+
+async function loadStats() {
+  try {
+    const data = await api('/api/stats');
+    document.getElementById('stat-total').textContent = data.stories.total;
+    document.getElementById('stat-pub').textContent = data.stories.published;
+    document.getElementById('stat-reactions').textContent = data.reactions;
+    document.getElementById('stat-views').textContent = data.views;
+
+    // Analytics
+    const maxEmoji = Math.max(...(data.emojiBreakdown || []).map(e => parseInt(e.count)), 1);
+    document.getElementById('emoji-bars').innerHTML = (data.emojiBreakdown || []).map(e => `
+      <div class="emoji-bar-row">
+        <span>${e.emoji}</span>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${(parseInt(e.count)/maxEmoji)*100}%"></div></div>
+        <span class="bar-count">${e.count}</span>
+      </div>
+    `).join('') || '<div style="color:var(--muted);font-size:.9rem">No reactions yet</div>';
+
+    document.getElementById('top-stories-list').innerHTML = (data.topStories || []).map((s, i) => `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:1.2rem;font-weight:900;color:var(--muted);min-width:20px">${i+1}</span>
+        <span style="font-size:1.3rem">${s.cover_emoji}</span>
+        <div style="flex:1">
+          <div style="font-size:.875rem;font-weight:600">${escHtml(s.title)}</div>
+          <div style="font-size:.75rem;color:var(--muted)">❤️ ${s.total_reactions} · 👁️ ${s.total_views}</div>
+        </div>
+      </div>
+    `).join('') || '<div style="color:var(--muted);font-size:.9rem">No data yet</div>';
+
+    document.getElementById('recent-activity').innerHTML = (data.recentActivity || []).map(a => {
+      const icon = a.type === 'reaction' ? a.detail : '👁️';
+      const timeAgo = relativeTime(a.created_at);
+      return `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:1.2rem">${icon}</span>
+          <div style="flex:1;font-size:.85rem">
+            <span style="color:var(--muted)">${a.type === 'reaction' ? 'Reaction on' : 'View on'}</span>
+            <strong> ${escHtml(a.story_title)}</strong>
+          </div>
+          <span style="font-size:.75rem;color:var(--muted)">${timeAgo}</span>
+        </div>
+      `;
+    }).join('') || '<div style="color:var(--muted);font-size:.9rem">No activity yet</div>';
+
+  } catch(e) { console.error(e); }
+}
+
+// ─── STORY FORM ────────────────────────────────────────
+function initEmojiPicker() {
+  const picker = document.getElementById('cover-emoji-picker');
+  picker.innerHTML = COVER_EMOJIS.map(e => `
+    <button class="emoji-pick-btn ${e === state.selectedEmoji ? 'selected' : ''}"
+      onclick="selectCoverEmoji('${e}', this)">${e}</button>
+  `).join('');
+}
+
+function selectCoverEmoji(emoji, btn) {
+  state.selectedEmoji = emoji;
+  document.querySelectorAll('.emoji-pick-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+async function submitStory() {
+  const title = document.getElementById('story-title').value.trim();
+  const content = document.getElementById('story-content').value.trim();
+  if (!title || !content) { toast('Title and content are required', 'error'); return; }
+
+  const payload = {
+    title,
+    content,
+    cover_emoji: state.selectedEmoji,
+    category: document.getElementById('story-category').value,
+    author: document.getElementById('story-author').value || 'Admin',
+    published: document.getElementById('story-published').checked,
+  };
+
+  try {
+    const editId = document.getElementById('edit-story-id').value;
+    if (editId) {
+      await api(`/api/stories/${editId}`, { method: 'PUT', body: JSON.stringify(payload) });
+      toast('Story updated! ✅', 'success');
+    } else {
+      await api('/api/stories', { method: 'POST', body: JSON.stringify(payload) });
+      toast('Story published! 🚀', 'success');
+    }
+    resetForm();
+    loadAdminStories();
+    loadStats();
+    switchAdminTab('stories', document.querySelector('.admin-tab'));
+  } catch(e) {
+    toast(e.message, 'error');
+  }
+}
+
+function resetForm() {
+  document.getElementById('edit-story-id').value = '';
+  document.getElementById('story-title').value = '';
+  document.getElementById('story-content').value = '';
+  document.getElementById('story-author').value = 'Admin';
+  document.getElementById('story-published').checked = true;
+  document.getElementById('story-category').value = 'General';
+  state.selectedEmoji = '📖';
+  document.getElementById('form-title').textContent = '✏️ Write a New Story';
+  initEmojiPicker();
+}
+
+async function editStory(id) {
+  try {
+    const story = await api(`/api/stories/${id}`);
+    document.getElementById('edit-story-id').value = id;
+    document.getElementById('story-title').value = story.title;
+    document.getElementById('story-content').value = story.content;
+    document.getElementById('story-author').value = story.author;
+    document.getElementById('story-published').checked = story.published;
+    document.getElementById('story-category').value = story.category;
+    document.getElementById('form-title').textContent = '✏️ Edit Story';
+    state.selectedEmoji = story.cover_emoji || '📖';
+    initEmojiPicker();
+    switchAdminTab('new', document.querySelectorAll('.admin-tab')[1]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch(e) {
+    toast(e.message, 'error');
+  }
+}
+
+async function deleteStory(id, title) {
+  if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+  try {
+    await api(`/api/stories/${id}`, { method: 'DELETE' });
+    toast('Story deleted', 'success');
+    loadAdminStories();
+    loadStats();
+  } catch(e) {
+    toast(e.message, 'error');
+  }
+}
+
+// ─── TABS ─────────────────────────────────────────────
+function switchAdminTab(tab, el) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('admin-tab-stories').style.display = tab === 'stories' ? '' : 'none';
+  document.getElementById('admin-tab-new').style.display = tab === 'new' ? '' : 'none';
+  document.getElementById('admin-tab-analytics').style.display = tab === 'analytics' ? '' : 'none';
+  if (tab === 'analytics') loadStats();
+  if (tab === 'new') initEmojiPicker();
+}
+
+// ─── UTILS ────────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, type = '') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3100);
+}
+
+function relativeTime(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs/24)}d ago`;
+}
+
+// ─── INIT ─────────────────────────────────────────────
+(async () => {
+  // Auto-init DB
+  try { await fetch('/api/init'); } catch {}
+
+  if (state.adminToken) updateNavAdmin(true);
+  loadStories();
+  initEmojiPicker();
+})();
+</script>
+</body>
+</html>
