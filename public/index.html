@@ -1162,7 +1162,7 @@ async function loadAdminStories() {
           <td>
             <div class="action-row">
               <button class="btn btn-ghost btn-sm" onclick="editStory(${s.id})">Edit</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteStory(${s.id}, '${escHtml(s.title).replace(/'/g, "\\'")}')">Del</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteStory(${s.id}, '${escHtml(s.title).replace(/'/g, "\\'")}')">🗑️</button>
             </div>
           </td>
         </tr>
