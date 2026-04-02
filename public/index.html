@@ -292,14 +292,17 @@
     font-size: 1.1rem;
   }
   .emoji-grid {
-    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    display: flex; gap: 8px; flex-wrap: nowrap; justify-content: center;
+    overflow-x: auto; padding-bottom: 4px;
   }
+  .emoji-grid::-webkit-scrollbar { height: 3px; }
+  .emoji-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   .emoji-btn {
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    padding: 12px 16px; border-radius: var(--radius-sm);
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 10px 12px; border-radius: var(--radius-sm);
     border: 2px solid var(--border); background: var(--warm);
     cursor: pointer; transition: var(--transition);
-    font-size: 1.6rem; min-width: 64px;
+    font-size: 1.5rem; min-width: 56px; flex-shrink: 0;
     position: relative;
   }
   .emoji-btn:hover { transform: scale(1.1); border-color: var(--gold); background: var(--card-bg); }
@@ -308,7 +311,7 @@
     background: rgba(232,70,10,0.08);
   }
   .emoji-btn .emoji-count {
-    font-size: 0.75rem; font-weight: 600; color: var(--muted);
+    font-size: 0.72rem; font-weight: 600; color: var(--muted);
     font-family: 'DM Sans', sans-serif;
   }
   .emoji-btn.reacted .emoji-count { color: var(--ember); }
@@ -394,15 +397,34 @@
   }
   .form-group textarea { resize: vertical; min-height: 200px; line-height: 1.7; }
 
-  .emoji-picker {
-    display: flex; gap: 8px; flex-wrap: wrap;
+  /* ─── COVER IMAGE UPLOAD ─── */
+  .cover-upload-area {
+    border: 2px dashed var(--border); border-radius: var(--radius-sm);
+    padding: 20px; text-align: center; cursor: pointer;
+    transition: var(--transition); background: var(--warm);
+    position: relative;
   }
-  .emoji-pick-btn {
-    font-size: 1.6rem; padding: 8px; border-radius: var(--radius-sm);
-    border: 2px solid var(--border); background: var(--warm); cursor: pointer;
-    transition: var(--transition);
+  .cover-upload-area:hover { border-color: var(--ember); background: rgba(232,70,10,0.04); }
+  .cover-upload-area input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
   }
-  .emoji-pick-btn:hover, .emoji-pick-btn.selected { border-color: var(--ember); background: rgba(232,70,10,0.08); transform: scale(1.1); }
+  .cover-upload-area .upload-icon { font-size: 2rem; margin-bottom: 6px; }
+  .cover-upload-area .upload-label { font-size: 0.85rem; color: var(--muted); }
+  .cover-upload-area .upload-label strong { color: var(--ember); }
+  .cover-preview {
+    width: 100%; max-height: 180px; object-fit: cover;
+    border-radius: var(--radius-sm); display: none; margin-top: 10px;
+  }
+  .cover-b64-input {
+    margin-top: 10px;
+    font-size: 0.75rem; color: var(--muted); word-break: break-all;
+    display: none;
+  }
+  .cover-clear-btn {
+    margin-top: 8px; font-size: 0.78rem; color: var(--ember);
+    background: none; border: none; cursor: pointer; font-family: inherit;
+    text-decoration: underline; display: none;
+  }
 
   /* ─── STORIES TABLE ─── */
   .admin-table-wrap { overflow-x: auto; }
@@ -506,8 +528,8 @@
     nav { height: 56px; }
     .nav-brand { font-size: 1.2rem; }
     .stories-grid { grid-template-columns: 1fr; gap: 16px; }
-    .emoji-grid { gap: 8px; }
-    .emoji-btn { min-width: 54px; padding: 10px 12px; font-size: 1.4rem; }
+    .emoji-grid { gap: 6px; justify-content: flex-start; }
+    .emoji-btn { min-width: 48px; padding: 8px 10px; font-size: 1.3rem; }
     .admin-header { flex-direction: column; align-items: flex-start; gap: 16px; }
     .btn { padding: 8px 14px; font-size: 0.82rem; }
   }
@@ -534,6 +556,38 @@
 
   /* action row spacing */
   .action-row { display: flex; gap: 8px; }
+
+  /* ─── PAGINATION ─── */
+  .page-nav {
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    margin: 40px 0 32px; flex-wrap: wrap;
+  }
+  .page-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 24px; border-radius: 50px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; border: 2px solid var(--border); background: var(--card-bg);
+    color: var(--ink); transition: var(--transition);
+  }
+  .page-btn:hover:not(:disabled) { border-color: var(--ember); color: var(--ember); }
+  .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .page-btn.primary {
+    background: linear-gradient(135deg, var(--ember), #c93800);
+    color: #fff; border-color: transparent;
+    box-shadow: 0 2px 12px rgba(232,70,10,0.3);
+  }
+  .page-btn.primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(232,70,10,0.4); }
+  .page-indicator {
+    font-size: 0.85rem; color: var(--muted); font-weight: 500; white-space: nowrap;
+  }
+  .page-dots {
+    display: flex; gap: 6px; align-items: center; margin: 0 8px;
+  }
+  .page-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border); transition: var(--transition); cursor: pointer;
+  }
+  .page-dot.active { background: var(--ember); transform: scale(1.3); }
 
   /* Divider */
   .divider { height: 1px; background: var(--border); margin: 28px 0; }
@@ -662,9 +716,19 @@
           <input type="hidden" id="edit-story-id">
 
           <div class="form-group">
-            <label>Cover Emoji</label>
-            <div class="emoji-picker" id="cover-emoji-picker">
-              📖 📚 🌙 🔥 ❤️ 🌊 🌿 ⭐ 🎭 🏔️ 🌸 🦋 🎪 🌈 💫 🔮
+            <label>Cover Image</label>
+            <div class="cover-upload-area" id="cover-upload-area" onclick="document.getElementById('cover-file-input').click()">
+              <input type="file" id="cover-file-input" accept="image/*" style="display:none" onchange="handleCoverUpload(event)">
+              <div class="upload-icon">🖼️</div>
+              <div class="upload-label">Click to upload an image<br><strong>JPG, PNG, WEBP</strong> · Will be stored as Base64</div>
+            </div>
+            <img id="cover-preview" class="cover-preview" alt="Cover preview">
+            <button class="cover-clear-btn" id="cover-clear-btn" onclick="clearCoverImage()">✕ Remove image</button>
+            <div style="margin-top:10px">
+              <label style="font-size:.78rem;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Or paste Base64 directly</label>
+              <textarea id="story-cover-b64" placeholder="data:image/jpeg;base64,..." 
+                style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--warm);font-family:monospace;font-size:0.72rem;height:70px;resize:none;outline:none;color:var(--muted)"
+                oninput="handleB64Input(this)"></textarea>
             </div>
           </div>
 
@@ -763,13 +827,15 @@ const state = {
     localStorage.setItem('sf_session', id);
     return id;
   })(),
-  selectedEmoji: '📖',
+  coverB64: '',
   currentFilter: 'all',
+  currentPage: 1,
   editingId: null,
 };
 
-const EMOJIS = ['❤️','😂','😮','😢','🔥','👏','🤔','💯'];
-const COVER_EMOJIS = ['📖','📚','🌙','🔥','❤️','🌊','🌿','⭐','🎭','🏔️','🌸','🦋','🎪','🌈','💫','🔮'];
+// Removed emoji index 1 (😂) and index 7 (💯): original ['❤️','😂','😮','😢','🔥','👏','🤔','💯']
+const EMOJIS = ['❤️','😮','😢','🔥','👏','🤔'];
+const LINES_PER_PAGE = 60;
 
 // ─── VIEWS ───────────────────────────────────────────
 function showView(name) {
@@ -855,9 +921,13 @@ function storyCardHTML(s, i) {
   const date = new Date(s.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'});
   const excerpt = s.content.slice(0, 120).trim() + (s.content.length > 120 ? '…' : '');
 
+  const coverHtml = s.cover_emoji && s.cover_emoji.startsWith('data:')
+    ? `<img src="${s.cover_emoji}" style="width:100%;height:100%;object-fit:cover;display:block" alt="cover">`
+    : `<span style="font-size:3rem">📖</span>`;
+
   return `
     <div class="story-card" onclick="openStory(${s.id})" style="animation-delay:${i*0.07}s">
-      <div class="card-banner">${s.cover_emoji || '📖'}</div>
+      <div class="card-banner" style="${s.cover_emoji && s.cover_emoji.startsWith('data:') ? 'padding:0' : ''}">${coverHtml}</div>
       <div class="card-body">
         <div class="card-meta">
           <span class="card-category">${s.category}</span>
@@ -899,26 +969,47 @@ async function openStory(id) {
   }
 }
 
-function renderStoryDetail(story, rxData) {
+function paginateContent(content) {
+  // Split by newlines, group every LINES_PER_PAGE lines into pages
+  const lines = content.split('\n');
+  const pages = [];
+  for (let i = 0; i < lines.length; i += LINES_PER_PAGE) {
+    pages.push(lines.slice(i, i + LINES_PER_PAGE).join('\n'));
+  }
+  return pages.length ? pages : [content];
+}
+
+function renderStoryDetail(story, rxData, page = 1) {
   const date = new Date(story.created_at).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
   const reactionMap = {};
   (rxData.counts || []).forEach(r => reactionMap[r.emoji] = parseInt(r.count));
   const userReacted = new Set(rxData.userReactions || []);
 
-  document.getElementById('story-content-area').innerHTML = `
-    <div class="story-header">
-      <div class="story-emoji-big">${story.cover_emoji || '📖'}</div>
-      <div class="category-badge">${story.category}</div>
-      <h1>${escHtml(story.title)}</h1>
-      <div class="story-byline">
-        <span>By ${escHtml(story.author || 'Admin')}</span>
-        <span>${date}</span>
-        <span>👁️ ${story.views || 0} views</span>
+  const pages = paginateContent(story.content);
+  const totalPages = pages.length;
+  state.currentPage = Math.max(1, Math.min(page, totalPages));
+  const pageContent = pages[state.currentPage - 1];
+
+  const coverHtml = story.cover_emoji && story.cover_emoji.startsWith('data:')
+    ? `<img src="${story.cover_emoji}" style="width:100%;max-height:320px;object-fit:cover;border-radius:var(--radius);margin-bottom:24px" alt="cover">`
+    : `<div class="story-emoji-big">📖</div>`;
+
+  const pageNavHtml = totalPages > 1 ? `
+    <div class="page-nav">
+      <button class="page-btn" onclick="changePage(${story.id}, ${state.currentPage - 1})" ${state.currentPage <= 1 ? 'disabled' : ''}>← Prev</button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <span class="page-indicator">Page ${state.currentPage} of ${totalPages}</span>
+        <div class="page-dots">
+          ${pages.map((_, idx) => `<div class="page-dot ${idx + 1 === state.currentPage ? 'active' : ''}" onclick="changePage(${story.id}, ${idx + 1})"></div>`).join('')}
+        </div>
       </div>
+      <button class="page-btn ${state.currentPage < totalPages ? 'primary' : ''}" onclick="changePage(${story.id}, ${state.currentPage + 1})" ${state.currentPage >= totalPages ? 'disabled' : ''}>Next →</button>
     </div>
+  ` : '';
 
-    <div class="story-content">${escHtml(story.content)}</div>
-
+  // Show reactions only on last page (or if only 1 page)
+  const isLastPage = state.currentPage === totalPages;
+  const reactionHtml = isLastPage ? `
     <div class="reaction-bar">
       <h3>How did this make you feel?</h3>
       <div class="emoji-grid" id="emoji-grid-${story.id}">
@@ -932,7 +1023,44 @@ function renderStoryDetail(story, rxData) {
         `).join('')}
       </div>
     </div>
+  ` : `
+    <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:.88rem">
+      📖 Continue reading to react — ${totalPages - state.currentPage} page${totalPages - state.currentPage !== 1 ? 's' : ''} left
+    </div>
   `;
+
+  document.getElementById('story-content-area').innerHTML = `
+    <div class="story-header">
+      ${coverHtml}
+      <div class="category-badge">${story.category}</div>
+      <h1>${escHtml(story.title)}</h1>
+      <div class="story-byline">
+        <span>By ${escHtml(story.author || 'Admin')}</span>
+        <span>${date}</span>
+        <span>👁️ ${story.views || 0} views</span>
+        ${totalPages > 1 ? `<span>📄 ${totalPages} pages</span>` : ''}
+      </div>
+    </div>
+
+    ${pageNavHtml}
+
+    <div class="story-content" id="story-page-content">${escHtml(pageContent)}</div>
+
+    ${pageNavHtml}
+
+    ${reactionHtml}
+  `;
+
+  // Scroll to top of content on page change
+  if (page > 1) {
+    document.getElementById('story-page-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+async function changePage(storyId, page) {
+  if (!state.currentStory) return;
+  const rxData = await api(`/api/reactions?story_id=${storyId}&session_id=${state.sessionId}`).catch(() => ({ counts: [], userReactions: [] }));
+  renderStoryDetail(state.currentStory, rxData, page);
 }
 
 // ─── REACTIONS ────────────────────────────────────────
@@ -1010,11 +1138,14 @@ async function loadAdminStories() {
     tbody.innerHTML = stories.map(s => {
       const totalRx = (s.reactions || []).reduce((a, r) => a + parseInt(r.count), 0);
       const date = new Date(s.created_at).toLocaleDateString();
+      const coverThumb = s.cover_emoji && s.cover_emoji.startsWith('data:')
+        ? `<img src="${s.cover_emoji}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;flex-shrink:0" alt="">`
+        : `<span style="font-size:1.4rem;flex-shrink:0">📖</span>`;
       return `
         <tr>
           <td>
             <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:1.4rem">${s.cover_emoji}</span>
+              ${coverThumb}
               <div>
                 <div style="font-weight:600;font-size:.875rem">${escHtml(s.title)}</div>
                 <div style="font-size:.75rem;color:var(--muted)">by ${escHtml(s.author)}</div>
@@ -1058,16 +1189,21 @@ async function loadStats() {
       </div>
     `).join('') || '<div style="color:var(--muted);font-size:.9rem">No reactions yet</div>';
 
-    document.getElementById('top-stories-list').innerHTML = (data.topStories || []).map((s, i) => `
-      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:1.2rem;font-weight:900;color:var(--muted);min-width:20px">${i+1}</span>
-        <span style="font-size:1.3rem">${s.cover_emoji}</span>
-        <div style="flex:1">
-          <div style="font-size:.875rem;font-weight:600">${escHtml(s.title)}</div>
-          <div style="font-size:.75rem;color:var(--muted)">❤️ ${s.total_reactions} · 👁️ ${s.total_views}</div>
+    document.getElementById('top-stories-list').innerHTML = (data.topStories || []).map((s, i) => {
+      const thumb = s.cover_emoji && s.cover_emoji.startsWith('data:')
+        ? `<img src="${s.cover_emoji}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;flex-shrink:0" alt="">`
+        : `<span style="font-size:1.3rem">📖</span>`;
+      return `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:1.2rem;font-weight:900;color:var(--muted);min-width:20px">${i+1}</span>
+          ${thumb}
+          <div style="flex:1">
+            <div style="font-size:.875rem;font-weight:600">${escHtml(s.title)}</div>
+            <div style="font-size:.75rem;color:var(--muted)">❤️ ${s.total_reactions} · 👁️ ${s.total_views}</div>
+          </div>
         </div>
-      </div>
-    `).join('') || '<div style="color:var(--muted);font-size:.9rem">No data yet</div>';
+      `;
+    }).join('') || '<div style="color:var(--muted);font-size:.9rem">No data yet</div>';
 
     document.getElementById('recent-activity').innerHTML = (data.recentActivity || []).map(a => {
       const icon = a.type === 'reaction' ? a.detail : '👁️';
@@ -1087,19 +1223,48 @@ async function loadStats() {
   } catch(e) { console.error(e); }
 }
 
-// ─── STORY FORM ────────────────────────────────────────
-function initEmojiPicker() {
-  const picker = document.getElementById('cover-emoji-picker');
-  picker.innerHTML = COVER_EMOJIS.map(e => `
-    <button class="emoji-pick-btn ${e === state.selectedEmoji ? 'selected' : ''}"
-      onclick="selectCoverEmoji('${e}', this)">${e}</button>
-  `).join('');
+// ─── COVER IMAGE (BASE64) ──────────────────────────────
+function handleCoverUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) { toast('Image too large — max 3MB', 'error'); return; }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    state.coverB64 = e.target.result;
+    document.getElementById('cover-preview').src = state.coverB64;
+    document.getElementById('cover-preview').style.display = 'block';
+    document.getElementById('story-cover-b64').value = state.coverB64;
+    document.getElementById('cover-clear-btn').style.display = 'inline-block';
+    document.getElementById('cover-upload-area').style.borderStyle = 'solid';
+    document.getElementById('cover-upload-area').style.borderColor = 'var(--ember)';
+  };
+  reader.readAsDataURL(file);
 }
 
-function selectCoverEmoji(emoji, btn) {
-  state.selectedEmoji = emoji;
-  document.querySelectorAll('.emoji-pick-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
+function handleB64Input(el) {
+  const val = el.value.trim();
+  if (val.startsWith('data:image')) {
+    state.coverB64 = val;
+    document.getElementById('cover-preview').src = val;
+    document.getElementById('cover-preview').style.display = 'block';
+    document.getElementById('cover-clear-btn').style.display = 'inline-block';
+  } else {
+    state.coverB64 = '';
+    document.getElementById('cover-preview').style.display = 'none';
+    document.getElementById('cover-clear-btn').style.display = 'none';
+  }
+}
+
+function clearCoverImage() {
+  state.coverB64 = '';
+  document.getElementById('cover-preview').src = '';
+  document.getElementById('cover-preview').style.display = 'none';
+  document.getElementById('story-cover-b64').value = '';
+  document.getElementById('cover-clear-btn').style.display = 'none';
+  document.getElementById('cover-file-input').value = '';
+  document.getElementById('cover-upload-area').style.borderStyle = 'dashed';
+  document.getElementById('cover-upload-area').style.borderColor = 'var(--border)';
 }
 
 async function submitStory() {
@@ -1110,7 +1275,7 @@ async function submitStory() {
   const payload = {
     title,
     content,
-    cover_emoji: state.selectedEmoji,
+    cover_emoji: state.coverB64 || '',
     category: document.getElementById('story-category').value,
     author: document.getElementById('story-author').value || 'Admin',
     published: document.getElementById('story-published').checked,
@@ -1141,9 +1306,8 @@ function resetForm() {
   document.getElementById('story-author').value = 'Admin';
   document.getElementById('story-published').checked = true;
   document.getElementById('story-category').value = 'General';
-  state.selectedEmoji = '📖';
   document.getElementById('form-title').textContent = '✏️ Write a New Story';
-  initEmojiPicker();
+  clearCoverImage();
 }
 
 async function editStory(id) {
@@ -1156,8 +1320,18 @@ async function editStory(id) {
     document.getElementById('story-published').checked = story.published;
     document.getElementById('story-category').value = story.category;
     document.getElementById('form-title').textContent = '✏️ Edit Story';
-    state.selectedEmoji = story.cover_emoji || '📖';
-    initEmojiPicker();
+
+    // Load cover image
+    if (story.cover_emoji && story.cover_emoji.startsWith('data:')) {
+      state.coverB64 = story.cover_emoji;
+      document.getElementById('story-cover-b64').value = story.cover_emoji;
+      document.getElementById('cover-preview').src = story.cover_emoji;
+      document.getElementById('cover-preview').style.display = 'block';
+      document.getElementById('cover-clear-btn').style.display = 'inline-block';
+    } else {
+      clearCoverImage();
+    }
+
     switchAdminTab('new', document.querySelectorAll('.admin-tab')[1]);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch(e) {
@@ -1185,7 +1359,6 @@ function switchAdminTab(tab, el) {
   document.getElementById('admin-tab-new').style.display = tab === 'new' ? '' : 'none';
   document.getElementById('admin-tab-analytics').style.display = tab === 'analytics' ? '' : 'none';
   if (tab === 'analytics') loadStats();
-  if (tab === 'new') initEmojiPicker();
 }
 
 // ─── UTILS ────────────────────────────────────────────
@@ -1218,7 +1391,6 @@ function relativeTime(dateStr) {
 
   if (state.adminToken) updateNavAdmin(true);
   loadStories();
-  initEmojiPicker();
 })();
 </script>
 </body>
