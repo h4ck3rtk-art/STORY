@@ -589,6 +589,19 @@
   }
   .page-dot.active { background: var(--ember); transform: scale(1.3); }
 
+  /* ─── INLINE STORY GIFs ─── */
+  .story-gif-wrap {
+    margin: 28px auto;
+    text-align: center;
+    max-width: 560px;
+  }
+  .story-gif {
+    max-width: 100%;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    display: inline-block;
+  }
+
   /* Divider */
   .divider { height: 1px; background: var(--border); margin: 28px 0; }
 </style>
@@ -775,7 +788,13 @@
 
           <div class="form-group">
             <label>Story Content *</label>
-            <textarea id="story-content" placeholder="Write your story here…&#10;&#10;Press Enter for new paragraphs. Markdown not required — your writing will shine as-is."></textarea>
+            <textarea id="story-content" placeholder="Write your story here…&#10;&#10;Press Enter for new paragraphs. Markdown not required — your writing will shine as-is.&#10;&#10;To insert a GIF, type: [GIF:https://i.imgbox.com/your-gif-url.gif]"></textarea>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="insertGifMarker()" style="font-size:.78rem">
+                🎞️ Insert GIF at cursor
+              </button>
+              <span style="font-size:.75rem;color:var(--muted)">Paste your Imgbox / Imgur direct GIF URL</span>
+            </div>
           </div>
 
           <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -1046,7 +1065,7 @@ function renderStoryDetail(story, rxData, page = 1) {
 
     ${pageNavHtml}
 
-    <div class="story-content" id="story-page-content">${escHtml(pageContent)}</div>
+    <div class="story-content" id="story-page-content">${renderContent(pageContent)}</div>
 
     ${pageNavHtml}
 
@@ -1368,6 +1387,34 @@ function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// Renders story content, converting [GIF:url] markers into inline GIF images
+function renderContent(text) {
+  const GIF_REGEX = /\[GIF:(https?:\/\/[^\]]+)\]/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+  while ((match = GIF_REGEX.exec(text)) !== null) {
+    // Push text before this GIF
+    if (match.index > lastIndex) {
+      parts.push(`<span>${escHtml(text.slice(lastIndex, match.index))}</span>`);
+    }
+    // Push GIF
+    const url = match[1].trim();
+    parts.push(`
+      <div class="story-gif-wrap">
+        <img class="story-gif" src="${escHtml(url)}" alt="GIF" loading="lazy"
+          onerror="this.parentElement.style.display='none'">
+      </div>
+    `);
+    lastIndex = match.index + match[0].length;
+  }
+  // Push remaining text
+  if (lastIndex < text.length) {
+    parts.push(`<span>${escHtml(text.slice(lastIndex))}</span>`);
+  }
+  return parts.join('');
+}
+
 function toast(msg, type = '') {
   const el = document.createElement('div');
   el.className = `toast ${type}`;
@@ -1384,6 +1431,25 @@ function relativeTime(dateStr) {
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
   return `${Math.floor(hrs/24)}d ago`;
+}
+
+// ─── GIF INSERTER ────────────────────────────────────
+function insertGifMarker() {
+  const url = prompt('Paste your direct GIF URL (e.g. https://i.imgbox.com/xxxx.gif):');
+  if (!url || !url.trim()) return;
+  const trimmed = url.trim();
+  if (!trimmed.startsWith('http')) { toast('Invalid URL — must start with http', 'error'); return; }
+
+  const ta = document.getElementById('story-content');
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const marker = `\n[GIF:${trimmed}]\n`;
+  ta.value = ta.value.slice(0, start) + marker + ta.value.slice(end);
+  // Move cursor after inserted marker
+  const pos = start + marker.length;
+  ta.selectionStart = ta.selectionEnd = pos;
+  ta.focus();
+  toast('GIF marker inserted ✅', 'success');
 }
 
 // ─── INIT ─────────────────────────────────────────────
