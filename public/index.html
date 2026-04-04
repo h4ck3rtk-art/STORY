@@ -594,7 +594,7 @@
 
   /* ─── INLINE STORY GIFs ─── */
   .story-gif-wrap {
-    margin: 4px auto;
+    margin: 0 auto;
     text-align: center;
     max-width: 560px;
   }
@@ -1404,11 +1404,11 @@ function renderContent(text) {
     // Push text before this GIF
  
     if (match.index > lastIndex) {
-  parts.push(`<p style="margin:0;white-space:pre-wrap">${escHtml(text.slice(lastIndex, match.index)).trimEnd()}</p>`);
+  const beforeText = text.slice(lastIndex, match.index).replace(/\n+$/, '');
+parts.push(<p style="margin:0;white-space:pre-wrap">${escHtml(beforeText)}</p>`);
 }
 const url = match[1].trim();
-parts.push(`
-  <div class="story-gif-wrap">
+parts.push(<div class="story-gif-wrap">
     <img class="story-gif" src="${escHtml(url)}" alt="GIF" loading="lazy"
       onerror="this.parentElement.style.display='none'">
   </div>
@@ -1417,8 +1417,8 @@ parts.push(`
     lastIndex = match.index + match[0].length;
   }
   // Push remaining text
- if (lastIndex < text.length) {
-  parts.push(`<p style="margin:0;white-space:pre-wrap">${escHtml(text.slice(lastIndex)).trimStart()}</p>`);
+const afterText = text.slice(lastIndex).replace(/^\n+/, '');
+parts.push(<p style="margin:0;white-space:pre-wrap">${escHtml(afterText)}</p>);
 }
   return parts.join('');
 }
