@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+  
+
+  
   :root {
     --ink: #1a1025;
     --paper: #faf8f5;
@@ -605,6 +608,33 @@
   /* Divider */
   .divider { height: 1px; background: var(--border); margin: 28px 0; }
 </style>
+<style>
+  /* === FIX FOR EXTRA SPACE BELOW GIFS & IMAGES IN STORIES === */
+  .story-content img,
+  #story-content img,
+  .story-body img,
+  #story-body img,
+  .content img,
+  #content img,
+  article img,
+  .prose img {
+    display: block !important;
+    margin: 12px 0 !important;     /* vertical spacing you like */
+    max-width: 100% !important;
+    height: auto !important;
+    vertical-align: bottom;
+  }
+
+  /* Extra safety - remove any line-height gap from parent paragraphs */
+  .story-content p:has(img),
+  .story-body p:has(img) {
+    line-height: 1 !important;
+    margin-bottom: 8px !important;
+  }
+</style>
+
+
+  
 </head>
 <body>
 
