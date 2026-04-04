@@ -1402,23 +1402,24 @@ function renderContent(text) {
   let match;
   while ((match = GIF_REGEX.exec(text)) !== null) {
     // Push text before this GIF
+ 
     if (match.index > lastIndex) {
-      parts.push(`<span>${escHtml(text.slice(lastIndex, match.index))}</span>`);
-    }
-    // Push GIF
-    const url = match[1].trim();
-    parts.push(`
-      <div class="story-gif-wrap">
-        <img class="story-gif" src="${escHtml(url)}" alt="GIF" loading="lazy"
-          onerror="this.parentElement.style.display='none'">
-      </div>
-    `);
+  parts.push(`<p style="margin:0;white-space:pre-wrap">${escHtml(text.slice(lastIndex, match.index)).trimEnd()}</p>`);
+}
+const url = match[1].trim();
+parts.push(`
+  <div class="story-gif-wrap">
+    <img class="story-gif" src="${escHtml(url)}" alt="GIF" loading="lazy"
+      onerror="this.parentElement.style.display='none'">
+  </div>
+`);
+    
     lastIndex = match.index + match[0].length;
   }
   // Push remaining text
-  if (lastIndex < text.length) {
-    parts.push(`<span>${escHtml(text.slice(lastIndex))}</span>`);
-  }
+ if (lastIndex < text.length) {
+  parts.push(`<p style="margin:0;white-space:pre-wrap">${escHtml(text.slice(lastIndex)).trimStart()}</p>`);
+}
   return parts.join('');
 }
 
