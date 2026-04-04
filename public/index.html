@@ -273,12 +273,36 @@
   .story-byline span::before { content: '·'; margin-right: 16px; }
   .story-byline span:first-child::before { content: ''; margin: 0; }
 
+  /* ─── STORY CONTENT ─── */
   .story-content {
-    font-size: 1.1rem; line-height: 1.85;
+    font-size: 1.1rem;
+    line-height: 1.85;
     color: #2a2030;
-    white-space: pre-wrap;
   }
-  .story-content p { margin-bottom: 1.4em; }
+
+  /* Text segments inside story content — no extra margin, just flow */
+  .story-content .story-text-segment {
+    white-space: pre-wrap;
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* GIF wrapper — flush against adjacent text, no vertical gap */
+  .story-content .story-gif-wrap {
+    display: block;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  .story-content .story-gif {
+    max-width: 100%;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    display: inline-block;
+    vertical-align: top;
+  }
 
   /* ─── REACTION BAR ─── */
   .reaction-bar {
@@ -592,19 +616,6 @@
   }
   .page-dot.active { background: var(--ember); transform: scale(1.3); }
 
-  /* ─── INLINE STORY GIFs ─── */
-  .story-gif-wrap {
-    margin: 0 auto;
-    text-align: center;
-    max-width: 560px;
-  }
-  .story-gif {
-    max-width: 100%;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-lg);
-    display: inline-block;
-  }
-
   /* Divider */
   .divider { height: 1px; background: var(--border); margin: 28px 0; }
 </style>
@@ -639,11 +650,7 @@
     <div class="hero">
        <div class="hero-tag">🫦 Erotic Stories</div>
       <h1>your <em> Deepest & Darkest </em> Desires </h1>
- <!--       <p>Explore handpicked tales and react with your heart. No words needed — just emojis.</p> -->
     </div>  
-
-
-    
 
     <div class="categories" id="categories-bar">
       <div class="cat-pill active" onclick="filterCategory('all', this)">🌍 All</div>
@@ -771,7 +778,6 @@
                 <option>Adultery</option>
                 <option>Fantasy</option>
                 <option>Forbidden</option>
-                
                </select>
             </div>
           </div>
@@ -861,7 +867,6 @@ const state = {
   editingId: null,
 };
 
-// Removed emoji index 1 (😂) and index 7 (💯): original ['❤️','😂','😮','😢','🔥','👏','🤔','💯']
 const EMOJIS = ['❤️','😮','😢','🔥','👏','🤔'];
 const LINES_PER_PAGE = 60;
 
@@ -998,7 +1003,6 @@ async function openStory(id) {
 }
 
 function paginateContent(content) {
-  // Split by newlines, group every LINES_PER_PAGE lines into pages
   const lines = content.split('\n');
   const pages = [];
   for (let i = 0; i < lines.length; i += LINES_PER_PAGE) {
@@ -1035,7 +1039,6 @@ function renderStoryDetail(story, rxData, page = 1) {
     </div>
   ` : '';
 
-  // Show reactions only on last page (or if only 1 page)
   const isLastPage = state.currentPage === totalPages;
   const reactionHtml = isLastPage ? `
     <div class="reaction-bar">
@@ -1079,7 +1082,6 @@ function renderStoryDetail(story, rxData, page = 1) {
     ${reactionHtml}
   `;
 
-  // Scroll to top of content on page change
   if (page > 1) {
     document.getElementById('story-page-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -1093,7 +1095,6 @@ async function changePage(storyId, page) {
 
 // ─── REACTIONS ────────────────────────────────────────
 async function toggleReaction(storyId, emoji, btn) {
-  // Pop animation
   const pop = document.createElement('span');
   pop.className = 'emoji-pop';
   pop.textContent = emoji;
@@ -1106,7 +1107,6 @@ async function toggleReaction(storyId, emoji, btn) {
       body: JSON.stringify({ story_id: storyId, emoji, session_id: state.sessionId })
     });
 
-    // Update all buttons in the grid
     const grid = document.getElementById(`emoji-grid-${storyId}`);
     if (!grid) return;
     const reactionMap = {};
@@ -1130,7 +1130,6 @@ async function adminLogin() {
   if (!pw) return;
 
   try {
-    // Test with stats endpoint
     const res = await fetch('/api/stats', {
       headers: { 'Authorization': `Bearer ${pw}` }
     });
@@ -1207,7 +1206,6 @@ async function loadStats() {
     document.getElementById('stat-reactions').textContent = data.reactions;
     document.getElementById('stat-views').textContent = data.views;
 
-    // Analytics
     const maxEmoji = Math.max(...(data.emojiBreakdown || []).map(e => parseInt(e.count)), 1);
     document.getElementById('emoji-bars').innerHTML = (data.emojiBreakdown || []).map(e => `
       <div class="emoji-bar-row">
@@ -1349,7 +1347,6 @@ async function editStory(id) {
     document.getElementById('story-category').value = story.category;
     document.getElementById('form-title').textContent = '✏️ Edit Story';
 
-    // Load cover image
     if (story.cover_emoji && story.cover_emoji.startsWith('data:')) {
       state.coverB64 = story.cover_emoji;
       document.getElementById('story-cover-b64').value = story.cover_emoji;
@@ -1394,32 +1391,46 @@ function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Renders story content, converting [GIF:url] markers into inline GIF images
+/**
+ * renderContent — converts story text with [GIF:url] markers into HTML.
+ *
+ * KEY FIX: Text segments are rendered as plain <span> elements with
+ * white-space:pre-wrap so newlines are preserved, but NO extra margin/padding
+ * is added between segments and GIFs. The .story-content container itself
+ * handles the overall flow. Both text spans and gif wrappers are display:block
+ * with zero margin so they sit flush against each other.
+ */
 function renderContent(text) {
   const GIF_REGEX = /\[GIF:(https?:\/\/[^\]]+)\]/g;
   const parts = [];
   let lastIndex = 0;
   let match;
+
   while ((match = GIF_REGEX.exec(text)) !== null) {
-    // Push text before this GIF
- 
+    // Capture text segment before this GIF — preserve it exactly as written
     if (match.index > lastIndex) {
-  const beforeText = text.slice(lastIndex, match.index).replace(/\n+$/, '');
-parts.push(<p style="margin:0;white-space:pre-wrap">${escHtml(beforeText)}</p>`);
-}
-const url = match[1].trim();
-parts.push(<div class="story-gif-wrap">
-    <img class="story-gif" src="${escHtml(url)}" alt="GIF" loading="lazy"
-      onerror="this.parentElement.style.display='none'">
-  </div>
-`);
-    
+      const segment = text.slice(lastIndex, match.index);
+      parts.push(`<span class="story-text-segment">${escHtml(segment)}</span>`);
+    }
+
+    // GIF element — flush block, no margin
+    const url = match[1].trim();
+    parts.push(
+      `<span class="story-gif-wrap">` +
+        `<img class="story-gif" src="${escHtml(url)}" alt="GIF" loading="lazy"` +
+        ` onerror="this.parentElement.style.display='none'">` +
+      `</span>`
+    );
+
     lastIndex = match.index + match[0].length;
   }
-  // Push remaining text
-const afterText = text.slice(lastIndex).replace(/^\n+/, '');
-parts.push(<p style="margin:0;white-space:pre-wrap">${escHtml(afterText)}</p>);
-}
+
+  // Remaining text after last GIF (or entire text if no GIFs)
+  if (lastIndex < text.length) {
+    const segment = text.slice(lastIndex);
+    parts.push(`<span class="story-text-segment">${escHtml(segment)}</span>`);
+  }
+
   return parts.join('');
 }
 
@@ -1451,9 +1462,8 @@ function insertGifMarker() {
   const ta = document.getElementById('story-content');
   const start = ta.selectionStart;
   const end = ta.selectionEnd;
-  const marker = `\n[GIF:${trimmed}]\n`;
+  const marker = `[GIF:${trimmed}]`;
   ta.value = ta.value.slice(0, start) + marker + ta.value.slice(end);
-  // Move cursor after inserted marker
   const pos = start + marker.length;
   ta.selectionStart = ta.selectionEnd = pos;
   ta.focus();
@@ -1462,9 +1472,7 @@ function insertGifMarker() {
 
 // ─── INIT ─────────────────────────────────────────────
 (async () => {
-  // Auto-init DB
   try { await fetch('/api/init'); } catch {}
-
   if (state.adminToken) updateNavAdmin(true);
   loadStories();
 })();
